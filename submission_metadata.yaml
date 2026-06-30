@@ -1,0 +1,43 @@
+# ============================================================
+# SUBMISSION METADATA — Redrob Candidate Ranking Challenge
+# Fill in the TODO placeholders before submitting.
+# ============================================================
+
+team_name: "Ai Quartet"
+challenge: "Redrob Intelligent Candidate Discovery & Ranking Challenge"
+event: "India Runs Hackathon (Hack2Skill)"
+
+submission:
+  output_file: "output/team_submission.csv"
+  notebook: "notebook/Redrob_Ranker.ipynb"
+  
+
+approach:
+  method: "Weighted multi-signal scoring with BM25 retrieval"
+  uses_llm_at_ranking_time: false
+  uses_gpu: false
+  uses_internet_at_ranking_time: false
+
+scoring_weights:
+  career_relevance: 0.35
+  production_signal: 0.25
+  trajectory: 0.20
+  skill_match: 0.15
+  hireability: 0.05
+
+guards:
+  honeypot_impossibility_gate: true     # drops physically-impossible profiles before scoring
+  consistency_penalty: true             # discounts self-ratings that contradict measured assessment scores
+  non_technical_profile_guard: true     # blocks buzzword-stuffed non-technical profiles via career-history analysis
+
+constraints:
+  cpu_only: true
+  max_runtime_minutes: 5
+  max_ram_gb: 16
+  top_n: 100
+
+output_columns:
+  - candidate_id
+  - rank
+  - score
+  - reasoning
