@@ -1,13 +1,4 @@
-#!/usr/bin/env python3
-"""
-Redrob Intelligent Candidate Discovery & Ranking
-=================================================
-Additive 7-layer rubric scoring pipeline.
-CPU-only, fully offline, single streaming pass, ~60s for 100K profiles.
 
-Usage:
-    python ranker.py --candidates candidates.jsonl --jd job_description.txt --out team_submission.csv
-"""
 
 import argparse
 import csv

@@ -68,6 +68,6 @@ output_columns:
   - reasoning
 
 ai_tools_used:
-  - Claude
+  - Claude , ChatGPT
 
 compute_environment: "Google Colab, CPU runtime, Python 3.10"
