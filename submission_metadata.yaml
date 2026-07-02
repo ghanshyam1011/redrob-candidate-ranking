@@ -1,6 +1,5 @@
 # ============================================================
 # SUBMISSION METADATA — Redrob Candidate Ranking Challenge
-# Fill in the TODO placeholders before submitting.
 # ============================================================
 
 team_name: "AI Quartet"
@@ -9,32 +8,57 @@ event: "India Runs Hackathon (Hack2Skill)"
 
 submission:
   output_file: "output/team_submission.csv"
-  notebook: "notebook/Redrob_Ranker.ipynb"
+  notebook: "Redrob_Ranker_v2.ipynb"
   repo: "TODO_GITHUB_REPO_URL"
   sandbox_demo: "TODO_COLAB_SHARE_LINK"
+  Google_Colab_runtime : "https://colab.research.google.com/drive/18Zt_7wGs_6cdG1wGZeBBm5nJDjr8uucP?usp=sharing"
 
 approach:
-  method: "Weighted multi-signal scoring with BM25 retrieval"
+  method: "Additive 7-layer rubric (Doc-4 JD-centric) with alias-aware JD skill matching and rank-aware fact-grounded reasoning"
   uses_llm_at_ranking_time: false
   uses_gpu: false
   uses_internet_at_ranking_time: false
+  score_range: "0.0 to 1.0 (raw score / 97, where 97 = sum of 7 positive layer maxima)"
+  runtime_seconds_measured: 60
+  peak_memory_mb_measured: 50
 
-scoring_weights:
-  career_relevance: 0.35
-  production_signal: 0.25
-  trajectory: 0.20
-  skill_match: 0.15
-  hireability: 0.05
+scoring_layers:
+  technical_substance:      28   # hands-on retrieval/embeddings/vector DB/ranking/LLM fine-tuning in career history
+  jd_skill_alignment:       22   # alias-aware match to JD's named tools against real dataset vocabulary
+  production_engineering:   15   # ownership/shipping evidence; hedged language halves credit
+  behavioral_hireability:   12   # redrob_signals: open_to_work, response rate, GitHub, recency, etc.
+  career_progression:       10   # 5-9y sweet spot, title growth, stable tenure, current eng role
+  company_context:           6   # AI/product vs services; company_size for scale exposure
+  education:                 4   # field_of_study + tier field from schema; postgrad studies
+  risk_penalty:         0 to -10 # keyword stuffing, overlapping dates, notice, inactivity, self-rating gap
 
 guards:
-  honeypot_impossibility_gate: true     # drops physically-impossible profiles before scoring
-  consistency_penalty: true             # discounts self-ratings that contradict measured assessment scores
-  non_technical_profile_guard: true     # blocks buzzword-stuffed non-technical profiles via career-history analysis
+  honeypot_hard_gate: true
+    # 6 checks before scoring — drops 2858 of 100000 (2.86%):
+    # 1. experience > 60y
+    # 2. experience implies work >6y before degree completion
+    # 3. stated experience exceeds entire listed career span by >8y (dataset-validated: 24 profiles)
+    # 4. overlapping non-current roles >31 days
+    # 5. >1 simultaneous is_current role
+    # 6. 3+ skills self-rated expert with explicit duration_months=0 (dataset-validated: 21 profiles)
+    # 7. career ending before degree began
+  soft_risk_penalty: true        # keyword stuffing, soft overlaps, tight timeline, notice, inactivity, self-rating
+  reference_date_fixed: "2026-06-30"  # deterministic — Stage-3 re-run produces byte-identical output
+
+reasoning:
+  generated_by_llm: false
+  fact_grounded: true            # every claim sourced from a scored field on that specific candidate
+  rank_aware_tone: true          # concern threshold scales with rank band (top-10 / 11-50 / 51-100)
+  rotating_opener: true          # 3 opener formats keyed by candidate_id — prevents template collapse
+  distinct_skeletons: 99         # of 100 rows (validated post-run)
+  exact_duplicates: 0
 
 constraints:
   cpu_only: true
   max_runtime_minutes: 5
+  measured_runtime_seconds: 60
   max_ram_gb: 16
+  peak_memory_streaming_mb: 50   # single-pass streaming; only top-300 buffer held in memory
   top_n: 100
 
 output_columns:
@@ -42,3 +66,8 @@ output_columns:
   - rank
   - score
   - reasoning
+
+ai_tools_used:
+  - Claude
+
+compute_environment: "Google Colab, CPU runtime, Python 3.10"
